@@ -860,7 +860,6 @@ public class Pubber {
         redirectRegistry == null ? toJson(extractedEndpoint) : redirectedEndpoint(redirectRegistry);
 
     if (extractedSignature == null) {
-      info("TAP removing endpointState");
       attemptedEndpoint = null;
       removeBlobsetBlobState(IOT_ENDPOINT_CONFIG);
       return;
@@ -876,7 +875,6 @@ public class Pubber {
     info("New config blob endpoint detected");
 
     try {
-      info("TAP applying endpointState");
       attemptedEndpoint = extractedSignature;
       endpointState.phase = BlobPhase.APPLY;
       endpointState.status = null;
@@ -887,7 +885,6 @@ public class Pubber {
     } catch (Exception e) {
       try {
         error("Reconfigure failed, attempting connection to last working endpoint", e);
-        info("TAP failure endpointState");
         endpointState.phase = BlobPhase.FINAL;
         endpointState.status = exceptionStatus(e, Category.BLOBSET_BLOB_APPLY);
         resetConnection(workingEndpoint);
