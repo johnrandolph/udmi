@@ -386,7 +386,7 @@ public class Pubber {
       deviceState.system.hardware = null;
     }
 
-    markStateDirty(0);
+    markStateDirty();
   }
 
   private void initializePersistentStore() {
@@ -408,6 +408,10 @@ public class Pubber {
   private File getPersistentStore() {
     return siteModel == null ? new File(String.format(PERSISTENT_TMP_FORMAT, deviceId)) :
         new File(siteModel.getDeviceWorkingDir(deviceId), PERSISTENT_STORE_FILE);
+  }
+
+  private void markStateDirty() {
+    markStateDirty(0);
   }
 
   private void markStateDirty(long delayMs) {
@@ -567,6 +571,7 @@ public class Pubber {
     }
     if (SystemMode.ACTIVE.equals(systemConfig.mode)) {
       deviceState.system.mode = SystemMode.ACTIVE;
+      markStateDirty();
     }
     if (systemConfig.last_start != null && DEVICE_START_TIME.before(systemConfig.last_start)) {
       System.err.printf("Device start time %s before last config start %s, terminating.",
@@ -890,7 +895,7 @@ public class Pubber {
     if (deviceState.blobset.blobs.isEmpty()) {
       deviceState.blobset = null;
     }
-    markStateDirty(0);
+    markStateDirty();
   }
 
   private void maybeRedirectEndpoint() {
