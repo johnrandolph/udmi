@@ -433,11 +433,12 @@ public abstract class SequenceBase {
     });
   }
 
-  protected void waitForConfigSync() {
-    untilTrue("device config sync", this::configUpdateComplete);
+  private void waitForConfigSync() {
+    debug("waiting for config sync");
+    messageEvaluateLoop(this::configUpdateComplete);
   }
 
-  private Date syncConfig() {
+  protected Date syncConfig() {
     updateConfig();
     waitForConfigSync();
     debug("config synced to " + JsonUtil.getTimestamp(deviceConfig.timestamp));
@@ -766,11 +767,15 @@ public abstract class SequenceBase {
     info(String.format("start %s after %s", waitingCondition, timeSinceStart()));
     updateConfig("before " + description);
     recordSequence("Wait for " + description);
+    messageEvaluateLoop(evaluator);
+    info(String.format("finished %s after %s", waitingCondition, timeSinceStart()));
+    waitingCondition = "nothing";
+  }
+
+  private void messageEvaluateLoop(Supplier<Boolean> evaluator) {
     while (evaluator.get()) {
       receiveMessage();
     }
-    info(String.format("finished %s after %s", waitingCondition, timeSinceStart()));
-    waitingCondition = "nothing";
   }
 
   private void recordSequence(String step) {
