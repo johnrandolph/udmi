@@ -435,7 +435,7 @@ public abstract class SequenceBase {
 
   private void waitForConfigSync() {
     debug("waiting for config sync");
-    messageEvaluateLoop(this::configUpdateComplete);
+    messageEvaluateLoop(this::configNotReady);
   }
 
   protected Date syncConfig() {
@@ -946,17 +946,20 @@ public abstract class SequenceBase {
     }
   }
 
-  private boolean configUpdateComplete() {
+  private boolean configNotReady() {
     Object receivedConfig = receivedUpdates.get("config");
     if (!(receivedConfig instanceof Config)) {
+      trace("no valid received config");
       return false;
     }
     List<String> differences = configDiffEngine.diff(deviceConfig,
         sanitizeConfig((Config) receivedConfig));
-    if (traceLogLevel() && !differences.isEmpty()) {
+    boolean configNotReady = !differences.isEmpty();
+    trace("testing valid received config " + configNotReady);
+    if (traceLogLevel() && configNotReady) {
       trace("\n+- " + Joiner.on("\n+- ").join(differences));
     }
-    return differences.isEmpty();
+    return configNotReady;
   }
 
   protected void trace(String message) {
