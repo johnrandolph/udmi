@@ -433,7 +433,7 @@ public abstract class SequenceBase {
     });
   }
 
-  private void waitForConfigSync() {
+  protected void waitForConfigSync() {
     untilTrue("device config sync", this::configUpdateComplete);
   }
 
@@ -607,6 +607,7 @@ public abstract class SequenceBase {
     updateConfig(SubFolder.BLOBSET, deviceConfig.blobset);
     updateConfig(SubFolder.DISCOVERY, deviceConfig.discovery);
     localConfigChange(reason);
+    waitForConfigSync();
   }
 
   private void updateConfig(SubFolder subBlock, Object data) {
@@ -940,7 +941,7 @@ public abstract class SequenceBase {
     }
   }
 
-  protected boolean configUpdateComplete() {
+  private boolean configUpdateComplete() {
     Object receivedConfig = receivedUpdates.get("config");
     if (!(receivedConfig instanceof Config)) {
       return false;
