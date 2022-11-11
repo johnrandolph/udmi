@@ -136,7 +136,7 @@ public class BlobsetSequences extends SequenceBase {
     });
   }
 
-  @Test
+  //@Test
   @Description("Restart and connect to same endpoint and expect it returns.")
   public void endpoint_config_connection_success_restart() {
     // Prepare for the restart.
