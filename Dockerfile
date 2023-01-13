@@ -24,10 +24,11 @@ WORKDIR /udmi
 #COPY $UDMI_SITE_MODEL sites/udmi_site_model
 #COPY $UDMI_SITE_MODEL foox
 
-FROM eclipse-temurin:latest AS src
+FROM eclipse-temurin:17.0.5_8-jdk AS src
 WORKDIR /udmi
 COPY --from=udmi_site_model / /
 COPY --from=python_deps / /
+COPY common common
 COPY docs docs
 COPY gencode gencode
 COPY misc misc
