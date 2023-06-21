@@ -30,16 +30,34 @@ function verify_docker_auths {
   return $?
 }
 
+function try_gradle_build {
+  ./bin/build
+}
+
+function alter_jar {
+  rm -rf /tmp/xxxx
+  mkdir /tmp/xxxx
+  unzip -q build/libs/udmis-1.0-SNAPSHOT-all.jar -d /tmp/xxxx
+  rm /tmp/xxxx/META-INF/native/libio_grpc_netty_shaded_netty_*.so
+  rm build/libs/udmis-1.0-SNAPSHOT-all.jar
+  d="$PWD"
+  cd /tmp/xxxx
+  zip -q -r "${d}/build/libs/udmis-1.0-SNAPSHOT-all.jar" .
+  cd "$d"
+}
+
 PROJECT=$(gcloud config get project)
 CREGISTRY=gcr.io
 REPOSITORY="${CREGISTRY}/${PROJECT}"
 IMAGE=udmis
+BUILDIMAGE=buildudmis
 
 cmd=$1
 shift || usage missing command
 
 verify_docker_credhelpers $CREGISTRY || die "No docker credRegistry, consider running:  gcloud auth configure-docker"
 verify_docker_auths $CREGISTRY || die "No docker auths, consider running:  gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://${CREGISTRY}"
+
 current_user=$USER@$HOSTNAME
 current_time=`date --utc --iso=seconds`
 version=`git describe --dirty`
@@ -53,6 +71,8 @@ funcver=`git describe $funchash`$funcdirty
 RUNARGS="--rm -ti -v $PWD/etc:/udmi -v $HOME/.config:/root/.config --tmpfs /tmp"
 
 if [[ $cmd == build ]]; then
+    try_gradle_build || die "Could not gradle build"
+    alter_jar
     rm -rf var
     mkdir -p var
     cat <<EOF > var/deployed_version.json
@@ -65,8 +85,17 @@ if [[ $cmd == build ]]; then
 EOF
     cat var/deployed_version.json
     docker build -f Dockerfile.udmis -t $IMAGE $DROOT
+elif [[ $cmd == buildimage ]]; then
+    docker build -f Dockerfile.udmis.build -t $BUILDIMAGE $DROOT
+elif [[ $cmd == buildrun ]]; then
+    # Do something here to either keep container running or keep fs
+    docker run --name buildrun $RUNARGS $BUILDIMAGE
+    # Do something here to access the run that just occurred
+    docker cp buildrun:/root/build/libs/root-1.0-SNAPSHOT.jar ./build/libs/root-1.0-SNAPSHOT.jar
+elif [[ $cmd == buildshell ]]; then
+    docker run --name buildrun $RUNARGS $BUILDIMAGE bash
 elif [[ $cmd == run ]]; then
-    docker run $RUNARGS udmis
+    docker run $RUNARGS $IMAGE
 elif [[ $cmd == shell ]]; then
     docker run $RUNARGS $IMAGE bash
 elif [[ $cmd == push ]]; then
