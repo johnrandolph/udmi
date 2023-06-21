@@ -4,20 +4,42 @@ ROOT=$(dirname $0)/..
 cd $ROOT
 DROOT=.
 
-function usage {
-    echo Error: $*
-    echo Usage: $0 { build, shell, run, push, deploy, status, logs, stop }
-    echo Project: $PROJECT
+function die {
+    echo >&2 "$*"
     exit 1
 }
 
+function usage {
+    echo >&2 Error: $*
+    echo >&2 Usage: $0 { build, shell, run, push, deploy, status, logs, stop }
+    echo >&2 Project: $PROJECT
+    exit 1
+}
+
+function verify_docker_credhelpers {
+  local registry="$1"
+  local out=$(jq .credHelpers\[\"${registry}\"\] $HOME/.docker/config.json)
+  [[ "$out" = "\"gcloud\"" ]]
+  return $?
+}
+
+function verify_docker_auths {
+  local registry="$1"
+  local out=$(jq .auths\[\"${registry}\"\]\[\"auth\"\] $HOME/.docker/config.json)
+  [[ -n "$out" ]]
+  return $?
+}
+
 PROJECT=$(gcloud config get project)
-REPOSITORY=gcr.io/$PROJECT
+CREGISTRY=gcr.io
+REPOSITORY="${CREGISTRY}/${PROJECT}"
 IMAGE=udmis
 
 cmd=$1
 shift || usage missing command
 
+verify_docker_credhelpers $CREGISTRY || die "No docker credRegistry, consider running:  gcloud auth configure-docker"
+verify_docker_auths $CREGISTRY || die "No docker auths, consider running:  gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://${CREGISTRY}"
 current_user=$USER@$HOSTNAME
 current_time=`date --utc --iso=seconds`
 version=`git describe --dirty`

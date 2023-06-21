@@ -1,7 +1,7 @@
 {
   "flow_defaults": {
     "protocol": "pubsub",
-    "hostname": "bos-peringknife-dev"
+    "hostname": "bos-johnrandolph-ci2"
   },
   "flows": {
     "state": {
@@ -15,6 +15,6 @@
   },
   "iot_access": {
     "provider": "gcp",
-    "project_id": "bos-peringknife-dev"
+    "project_id": "bos-johnrandolph-ci2"
   }
 }
