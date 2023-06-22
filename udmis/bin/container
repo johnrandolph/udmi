@@ -30,10 +30,6 @@ function verify_docker_auths {
   return $?
 }
 
-function try_gradle_build {
-  ./bin/build
-}
-
 function alter_jar {
   echo alter_jar: not doing this strategy
   return 0
@@ -73,8 +69,6 @@ funcver=`git describe $funchash`$funcdirty
 RUNARGS="--rm -ti -v $PWD/etc:/udmi -v $HOME/.config:/root/.config --tmpfs /tmp"
 
 if [[ $cmd == build ]]; then
-    try_gradle_build || die "Could not gradle build"
-    alter_jar
     rm -rf var
     mkdir -p var
     cat <<EOF > var/deployed_version.json
