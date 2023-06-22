@@ -24,6 +24,5 @@ ADD var/ var/
 ADD src/ src/
 ADD build.gradle /root/build.gradle
 ADD gradlew /root/gradlew
-#ADD build/libs/udmis-1.0-SNAPSHOT-all.jar build/libs/udmis-1.0-SNAPSHOT-all.jar
 
-CMD ["/usr/bin/gradle", "build", "-Dskip.tests=true", "-x", "checkstyleMain", "-x", "test", "-x", "checkstyleTest", ":jar"]
+CMD ["/bin/bash", "-c", "/usr/bin/gradle build -Dskip.tests=true -x checkstyleMain -x test -x checkstyleTest :jar ; cp build/libs/*.jar /opt"]

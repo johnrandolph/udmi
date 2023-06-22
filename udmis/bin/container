@@ -35,12 +35,14 @@ function try_gradle_build {
 }
 
 function alter_jar {
+  echo alter_jar: not doing this strategy
+  return 0
   rm -rf /tmp/xxxx
   mkdir /tmp/xxxx
   unzip -q build/libs/udmis-1.0-SNAPSHOT-all.jar -d /tmp/xxxx
   rm /tmp/xxxx/META-INF/native/libio_grpc_netty_shaded_netty_*.so
   rm build/libs/udmis-1.0-SNAPSHOT-all.jar
-  d="$PWD"
+  local d="$PWD"
   cd /tmp/xxxx
   zip -q -r "${d}/build/libs/udmis-1.0-SNAPSHOT-all.jar" .
   cd "$d"
@@ -89,11 +91,12 @@ elif [[ $cmd == buildimage ]]; then
     docker build -f Dockerfile.udmis.build -t $BUILDIMAGE $DROOT
 elif [[ $cmd == buildrun ]]; then
     # Do something here to either keep container running or keep fs
-    docker run --name buildrun $RUNARGS $BUILDIMAGE
-    # Do something here to access the run that just occurred
-    docker cp buildrun:/root/build/libs/root-1.0-SNAPSHOT.jar ./build/libs/root-1.0-SNAPSHOT.jar
+    rm -rf $PWD/dockerbuild && mkdir $PWD/dockerbuild
+    docker run --name buildrun \
+      $RUNARGS -v $PWD/dockerbuild:/opt \
+      $BUILDIMAGE
 elif [[ $cmd == buildshell ]]; then
-    docker run --name buildrun $RUNARGS $BUILDIMAGE bash
+    docker run $RUNARGS -v $PWD/dockerbuild:/opt $BUILDIMAGE bash
 elif [[ $cmd == run ]]; then
     docker run $RUNARGS $IMAGE
 elif [[ $cmd == shell ]]; then
