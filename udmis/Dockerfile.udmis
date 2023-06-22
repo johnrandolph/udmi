@@ -20,6 +20,6 @@ RUN apk add openjdk17 bash
 ADD bin/ bin/
 ADD var/ var/
 #ADD build/libs/udmis-1.0-SNAPSHOT-all.jar build/libs/udmis-1.0-SNAPSHOT-all.jar
-ADD dockerbuild/root-1.0-SNAPSHOT.jar build/libs/udmis-1.0-SNAPSHOT-all.jar
+ADD dockerbuild/root-1.0-SNAPSHOT-all.jar build/libs/udmis-1.0-SNAPSHOT-all.jar
 
 CMD ["/root/bin/run", "/udmi/gcp_pod.json"]

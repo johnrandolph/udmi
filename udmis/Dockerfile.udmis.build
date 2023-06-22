@@ -25,4 +25,4 @@ ADD src/ src/
 ADD build.gradle /root/build.gradle
 ADD gradlew /root/gradlew
 
-CMD ["/bin/bash", "-c", "/usr/bin/gradle build -Dskip.tests=true -x checkstyleMain -x test -x checkstyleTest :jar ; cp build/libs/*.jar /opt"]
+CMD ["/bin/bash", "-c", "/usr/bin/gradle shadow -Dskip.tests=true -x checkstyleMain -x test -x checkstyleTest :jar ; cp build/libs/*.jar /opt"]
